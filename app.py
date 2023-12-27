@@ -10,17 +10,17 @@ app = Flask(__name__)
 
 key='tmp1.pem'
 
-trustedhost_ip=""
+trustedhost_dns=""
 
 @app.route('/direct')
 def direct_hit():
     query = request.args.get('query')
-    print("trustedhost_ip:",trustedhost_ip)
+    print("trustedhost_ip:",trustedhost_dns)
     print("query:",query)
     
     # connection ssh with trustedhost
-    with SSHTunnelForwarder((trustedhost_ip,22), ssh_username="ubuntu", ssh_pkey=key, remote_bind_address=(trustedhost_ip, 80)) as tunnel:
-       url=f"http://{trustedhost_ip}/direct?query={query}"
+    with SSHTunnelForwarder((trustedhost_dns,22), ssh_username="ubuntu", ssh_pkey=key, remote_bind_address=(trustedhost_dns, 80)) as tunnel:
+       url=f"http://{trustedhost_dns}/direct?query={query}"
        print(url)
        result = requests.get(url)
        print(result.text)
@@ -30,12 +30,12 @@ def direct_hit():
 @app.route('/custom')
 def custom_hit():
     query = request.args.get('query')
-    print("trustedhost_ip:",trustedhost_ip)
+    print("trustedhost_ip:",trustedhost_dns)
     print("query:",query)
     
     # connection ssh with trustedhost
-    with SSHTunnelForwarder((trustedhost_ip,22), ssh_username="ubuntu", ssh_pkey=key, remote_bind_address=(trustedhost_ip, 80)) as tunnel:
-       url=f"http://{trustedhost_ip}/custom?query={query}"
+    with SSHTunnelForwarder((trustedhost_dns,22), ssh_username="ubuntu", ssh_pkey=key, remote_bind_address=(trustedhost_dns, 80)) as tunnel:
+       url=f"http://{trustedhost_dns}/custom?query={query}"
        print(url)
        result = requests.get(url)
        print(result.text)
@@ -45,12 +45,12 @@ def custom_hit():
 @app.route('/random')
 def random_hit():
     query = request.args.get('query')
-    print("proxy_ip:",trustedhost_ip)
+    print("proxy_ip:",trustedhost_dns)
     print("query:",query)
     
     # connection ssh with trustedhost
-    with SSHTunnelForwarder((trustedhost_ip,22), ssh_username="ubuntu", ssh_pkey=key, remote_bind_address=(trustedhost_ip, 80)) as tunnel:
-       url=f"http://{trustedhost_ip}/random?query={query}"
+    with SSHTunnelForwarder((trustedhost_dns,22), ssh_username="ubuntu", ssh_pkey=key, remote_bind_address=(trustedhost_dns, 80)) as tunnel:
+       url=f"http://{trustedhost_dns}/random?query={query}"
        print(url)
        result = requests.get(url)
        print(result.text)
@@ -79,15 +79,15 @@ def get_instance_ip():
         ]
     )
 
-    trustedhost_found_ip=""
+    trustedhost_found_dns=""
 
     for reservation in trustedhost['Reservations']:
         for instance in reservation['Instances']:
-            print(instance.get('PublicIpAddress'))
-            trustedhost_found_ip = instance.get('PublicIpAddress')
-
-    return trustedhost_found_ip
+            print(instance.get('PublicDnsName'))
+            trustedhost_found_dns = instance.get('PublicDnsName')
+        
+    return trustedhost_found_dns
 
 if __name__ == '__main__':
-  trustedhost_ip=get_instance_ip()
+  trustedhost_dns=get_instance_ip()
   app.run(host='0.0.0.0', port=80)
